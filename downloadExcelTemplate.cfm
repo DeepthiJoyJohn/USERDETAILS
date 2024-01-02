@@ -1,0 +1,2 @@
+<cfheader name="Content-Disposition" value="attachment;filename=Plain_Template.xlsx">
+<cfcontent file="#expandPath('ExcelTemplate/Plain_Template.xlsx')#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">

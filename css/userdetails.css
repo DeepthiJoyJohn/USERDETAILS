@@ -1,0 +1,128 @@
+body{
+  background-color: rgb(210, 210, 218);
+}
+.heading{
+  text-align: center;
+  font-size: 20px;
+  font-weight:bold;
+}
+.btnDiv{
+  margin-top:40px;
+  
+   
+}
+.btnLeft{
+ float: left;
+ margin-left:80px;
+ border: 1px solid;
+ width:480px;
+
+  
+}
+.btnRight{
+  float: right;
+  margin-right:80px;
+  display: flex;
+  border: 1px solid;
+  width:480px;
+ 
+}
+.plainTemplate{
+  background-color: rgb(91, 194, 91);
+  border:0px;
+  padding:7px;
+  border-radius: 5px;
+  color:white;
+}
+.templateWithData{
+  background-color: rgb(100, 146, 245);
+  border:0px;
+  padding:7px;
+  border-radius: 5px;
+  color:white;
+  margin-left:50px;
+  float:right;
+}
+.browse{
+  background-color: rgb(106, 107, 109);
+  border:0px;
+  padding:7px;
+  border-radius: 5px;
+  color:white;
+  float:left;
+}
+.upload{
+  background-color: rgb(22, 197, 22);
+  border:0px;
+  padding:7px;
+  border-radius: 5px;
+  color:white;  
+  float:right;
+  
+
+}
+.tableDiv{
+  margin-top:50px;   
+  width: 80%;
+  position: fixed;
+
+ 
+}
+.table{
+  border-collapse: collapse;
+  margin-left:75px;
+  width:100%;
+  table-layout: fixed;
+  
+}
+.table th {
+  border: 1px solid #b3b2b2; 
+  padding: 5px; 
+  text-align: left; 
+  font-size: 12px;
+  width:160px;  
+  background-color: rgb(192, 192, 188);
+  
+}
+.table td {
+  border: 1px solid #b3b2b2; 
+  padding: 5px; 
+  text-align: left; 
+  font-size: 12px;
+  width:160px;
+  background-color: white;
+  word-wrap: break-word;
+}
+.spanTableHeading{
+  margin-left:75px;
+  padding-bottom:10px;  
+  
+}
+.fileUpload{
+  display: none;
+}
+.selectedFileInfo{  
+  font-size: 12px;  
+  color:brown;
+  
+  display: inline-block; 
+  width: 200px; 
+  overflow: hidden;
+  white-space: nowrap; 
+  text-overflow: ellipsis;     
+  padding: 5px;
+  border:1px solid;
+  width:360px;
+}
+.cancel-button {
+  padding: 8px 16px; /* Adjust padding as needed for button size */
+  background-color: #f44336; /* Red background color */
+  color: white; /* Text color */
+  border: none; /* Remove border */
+  border-radius: 4px; /* Optional: Add rounded corners */
+  cursor: pointer; /* Cursor style */
+  text-align: center; /* Center text horizontally */
+  text-decoration: none; /* Remove default underline */
+  display: inline-block; /* Make the button a block element */
+  transition: background-color 0.3s; /* Smooth background color transition on hover */
+}
