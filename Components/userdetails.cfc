@@ -17,5 +17,19 @@
 		</cfquery>
 		<cfreturn qgetUserDetails> 		
 	</cffunction>
+
+	<cffunction name="uploadExcel" access="remote" returntype="string">
+		<cfargument name="fileUpload" type="any" required="true">
+		<cfset local.timestamp = DateFormat(now(), "yyyymmdd_HHmmss")>
+		<cfset local.uniqueFilename = "Excel_#local.timestamp#.xlsx">		 
+        <cffile action="upload" fileField="fileUpload" destination="#expandPath('ExcelUploads/')##uniqueFilename#" nameConflict="MakeUnique">
+		<cfset filePath = "#expandPath('ExcelUploads/')##uniqueFilename#">
+		<cfspreadsheet action="read" src="#filePath#" query="excelData">
+			<cfoutput query="excelData">
+        		<p>User ID: #excelData.COL_1#</p>
+    		</cfoutput>
+
+        <cfreturn "File uploaded successfully!">
+	</cffunction>
 </cfcomponent>
 
