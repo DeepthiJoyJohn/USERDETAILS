@@ -8,24 +8,17 @@ body{
 }
 .btnDiv{
   margin-top:40px;
-  
-   
 }
 .btnLeft{
  float: left;
- margin-left:80px;
- border: 1px solid;
- width:480px;
-
-  
+ margin-left:80px; 
+ width:480px;  
 }
 .btnRight{
   float: right;
   margin-right:80px;
-  display: flex;
-  border: 1px solid;
-  width:480px;
- 
+  display: flex;  
+  width:480px; 
 }
 .plainTemplate{
   background-color: rgb(91, 194, 91);
@@ -58,8 +51,9 @@ body{
   border-radius: 5px;
   color:white;  
   float:right;
-  
-
+}
+.cancel{
+  cursor: pointer;
 }
 .tableDiv{
   margin-top:50px;   
@@ -103,26 +97,27 @@ body{
 }
 .selectedFileInfo{  
   font-size: 12px;  
-  color:brown;
-  
+  color:brown;  
   display: inline-block; 
   width: 200px; 
   overflow: hidden;
   white-space: nowrap; 
   text-overflow: ellipsis;     
-  padding: 5px;
-  border:1px solid;
+  padding: 5px;  
   width:360px;
 }
-.cancel-button {
-  padding: 8px 16px; /* Adjust padding as needed for button size */
-  background-color: #f44336; /* Red background color */
-  color: white; /* Text color */
-  border: none; /* Remove border */
-  border-radius: 4px; /* Optional: Add rounded corners */
-  cursor: pointer; /* Cursor style */
-  text-align: center; /* Center text horizontally */
-  text-decoration: none; /* Remove default underline */
-  display: inline-block; /* Make the button a block element */
-  transition: background-color 0.3s; /* Smooth background color transition on hover */
+.result{
+  font-size: 12px;  
+  color:brown;  
+  display: inline-block; 
+  width: 200px; 
+  overflow: hidden;
+  white-space: nowrap; 
+  text-overflow: ellipsis;     
+  padding: 5px;  
+  width:500px;
+  margin-top:-70px;
+  border:1px solid;
+  margin-left:800px;
+
 }

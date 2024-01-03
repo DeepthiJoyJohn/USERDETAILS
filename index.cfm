@@ -9,19 +9,19 @@
     </head>
     <body> 
         <cfoutput>
-            <form action="" method="post" enctype="multipart/form-data" >
+            <form action="" method="post" id="myForm" enctype="multipart/form-data" >
                 <cfset local.userObject=createObject("component", "Components.userdetails")>
                 <cfset local.resultUserDetails=local.userObject.getUserDetails()>
                 <div class="heading">USER INFORMATION</div>
                 <div class="btnDiv">
                     <div class="btnLeft">
                         <button class="plainTemplate" onclick="generateExcelTemplate()">Plain Template</button>
-                        <button class="templateWithData">Template With Data</button>
+                        <button class="templateWithData" onclick="generateDataExcelTemplate()">Template With Data</button>
                     </div>
                     <div class="btnRight">
                         <button class="browse" onclick="browse()">Browse<input type="file" name="fileUpload" id="fileUpload" class="fileUpload" required="yes" accept=".xlsx, .xls" /></button>                        
-                        <div class="selectedFileInfo" id="selectedFileInfo"><span id="closeIcon"><i class="fa fa-close"></i></span></div>  
-                        <button class="upload">Upload</button>
+                        <div class="selectedFileInfo" id="selectedFileInfo"></div>  
+                        <button class="upload" onclick="upload()" type="submit" name="uploadBtn">Upload</button>
                     </div>
                 </div>   
                 <div class="tableDiv">   
@@ -48,8 +48,13 @@
                             </cfloop>
                         </tr>               
                     </table>
-                </div>
-            </form>
+                </div>   
+            </form>  
+            <cfset local.resultExcelUpload="">
+            <cfif  StructKeyExists(form,"uploadBtn") && NOT IsNull(form.fileUpload)> 
+                <cfset local.resultExcelUpload=local.userObject.uploadExcel(#form.fileUpload#)>
+            </cfif>                   
+            <div class="result" id="result">#local.resultExcelUpload#</div>         
         </cfoutput>
     </body>     
 </html>
