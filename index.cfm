@@ -54,6 +54,7 @@
             <cfif  StructKeyExists(form,"uploadBtn") && NOT IsNull(form.fileUpload)> 
                 <cfset local.resultExcelUpload=local.userObject.uploadExcel(#form.fileUpload#)>
                 <cflocation url="index.cfm">
+                <cfset local.userObject.generateResultExcel()>
             </cfif>                   
             <div class="result" id="result">#local.resultExcelUpload#</div>         
         </cfoutput>

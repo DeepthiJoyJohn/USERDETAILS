@@ -127,7 +127,7 @@
 				</cfquery>
 			</cfif>
 		</cfloop>
-		<cfset generateResultExcel()>
+		<!---<cfset local.result=generateResultExcel()>--->
 		<cfreturn "File uploaded successfully!">
 	</cffunction>
 	<cffunction name="generateResultExcel" access="public">
@@ -150,6 +150,7 @@
 		<cfset Spreadsheetwrite(local.mySpreadsheet,'#expandPath('ExcelTemplate/DataExcel/')##local.uniqueFilename#',true)>
 		<cfheader name="Content-Disposition" value="attachment;filename=#uniqueFilename#">
 		<cfcontent file="#expandPath('ExcelTemplate/DataExcel/')##uniqueFilename#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"> 
+		
 	</cffunction>
 </cfcomponent>
 
