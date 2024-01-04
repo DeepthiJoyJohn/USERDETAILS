@@ -35,24 +35,25 @@
                             <th>Phone</th>
                             <th>DOB</th>
                             <th>Role</th>
-                        </tr>
-                        <tr>
-                            <cfloop query="local.resultUserDetails">
+                        </tr>                        
+                        <cfloop query="local.resultUserDetails">
+                            <tr>
                                 <td>#firstname#</td>
                                 <td>#lastname#</td>
                                 <td>#address#</td>
                                 <td>#email#</td>
                                 <td>#phone#</td>
                                 <td>#dob#</td>
-                                <td>#rolenames#</td>                            
-                            </cfloop>
-                        </tr>               
+                                <td>#rolenames#</td> 
+                            </tr>                           
+                        </cfloop>                                      
                     </table>
                 </div>   
             </form>  
             <cfset local.resultExcelUpload="">
             <cfif  StructKeyExists(form,"uploadBtn") && NOT IsNull(form.fileUpload)> 
                 <cfset local.resultExcelUpload=local.userObject.uploadExcel(#form.fileUpload#)>
+                <cflocation url="index.cfm">
             </cfif>                   
             <div class="result" id="result">#local.resultExcelUpload#</div>         
         </cfoutput>
