@@ -4,7 +4,7 @@
 <cfset local.headerFormat.bold = "true">
 <cfset spreadsheetFormatRow(local.mySpreadsheet, local.headerFormat, 1)> 
 <cfset local.userObject = createObject("component", "Components.userdetails")>
-<cfset local.resultUserDetails = local.userObject.getUserDetails()>
+<cfset local.resultUserDetails = local.userObject.getUserDetails(0)>
 <cfloop query="local.resultUserDetails">
     <cfset local.rolenames ="'#local.resultUserDetails.rolenames#'">        
     <cfset local.combinedValues = '#local.resultUserDetails.firstname#,#local.resultUserDetails.lastname#,

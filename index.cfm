@@ -11,7 +11,7 @@
         <cfoutput>
             <form action="" method="post" id="myForm" enctype="multipart/form-data" >
                 <cfset local.userObject=createObject("component", "Components.userdetails")>
-                <cfset local.resultUserDetails=local.userObject.getUserDetails()>
+                <cfset local.resultUserDetails=local.userObject.getUserDetails(0)>
                 <div class="heading">USER INFORMATION</div>
                 <div class="btnDiv">
                     <div class="btnLeft">
@@ -53,10 +53,11 @@
             <cfset local.resultExcelUpload="">
             <cfif  StructKeyExists(form,"uploadBtn") && NOT IsNull(form.fileUpload)> 
                 <cfset local.resultExcelUpload=local.userObject.uploadExcel(#form.fileUpload#)>
+                <!---<a href="index.cfm" target="_blank">Download Excel</a>--->
+                <div class="result" id="result1">#local.resultExcelUpload#</div>
                 <cflocation url="index.cfm">
-                <cfset local.userObject.generateResultExcel()>
             </cfif>                   
-            <div class="result" id="result">#local.resultExcelUpload#</div>         
+            <div class="result" id="result"></div>         
         </cfoutput>
     </body>     
 </html>

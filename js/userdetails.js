@@ -1,5 +1,6 @@
-function generateExcelTemplate(){
+function generateExcelTemplate(){  
   window.location.href="downloadExcelTemplate.cfm"
+  
 }
 function generateDataExcelTemplate(){
   window.location.href="downloadDataExcelTemplate.cfm"
@@ -19,8 +20,8 @@ function upload() {
       return false;
   } 
 }
-function browse() {
-  var result = document.getElementById('result');
+function browse() {  
+  var result = document.getElementById('result'); 
   result.innerHTML = "";
   document.getElementById('fileUpload').click();
   document.getElementById('fileUpload').addEventListener('change', function() {

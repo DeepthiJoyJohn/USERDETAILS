@@ -58,9 +58,7 @@ body{
 .tableDiv{
   margin-top:50px;   
   width: 80%;
-  position: fixed;
-
- 
+  position: absolute; 
 }
 .table{
   border-collapse: collapse;
@@ -117,7 +115,7 @@ body{
   padding: 5px;  
   width:500px;
   margin-top:-70px;
-  border:1px solid;
+  
   margin-left:800px;
 
 }
