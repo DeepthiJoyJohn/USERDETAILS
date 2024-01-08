@@ -5,7 +5,7 @@
 			SELECT
 				u.userid,
 				u.firstname,u.lastname,u.address,u.email,u.phone,u.dob,u.result,
-				GROUP_CONCAT(r.rolename, '') AS rolenames
+				GROUP_CONCAT(r.rolename, '') AS rolenames,GROUP_CONCAT(u.address, '') AS address
 			FROM
 				USER u
 			INNER JOIN
@@ -24,11 +24,12 @@
 	<cffunction name="getUserDetailsWithError" access="public" returntype="query">
 		<cfargument name="seqNo">
 		<cfquery name="qgetUserDetailsWithError" datasource="#application.datasoursename#">
-			SELECT *
+			SELECT id, email, firstname, lastname, phone, dob,seq,result,roles,GROUP_CONCAT(address, '') AS address
 			FROM exceluploaderror
-			WHERE firstname <> "" AND lastname <> "" AND address <> "" AND email <> "" 
-			AND phone <> "" AND dob <> "" AND 
-			seq=<cfqueryparam value="#arguments.seqNo#" cfsqltype="cf_sql_integer">												
+			WHERE (firstname <> "" OR lastname <> "" OR address <> "" OR email <> "" 
+			OR phone <> "" OR dob <> "") AND 
+			seq=<cfqueryparam value="#arguments.seqNo#" cfsqltype="cf_sql_integer">	
+			GROUP BY id, email, firstname, lastname, phone, dob,seq,result,roles											
 		</cfquery>
 		<cfreturn qgetUserDetailsWithError> 		
 	</cffunction>
@@ -40,6 +41,17 @@
 			WHERE email=<cfqueryparam value="#arguments.email#" cfsqltype="cf_sql_varchar"> 
 		</cfquery>
 		<cfreturn qcheckEmailExists.recordCount>
+	</cffunction>
+	<cffunction name="getMaxSeqNo" access="public" returntype="numeric">
+		<cfquery name="qGetSeqNo" datasource="#application.datasoursename#">
+			SELECT COALESCE(MAX(seq), 1) AS seqno
+			FROM (
+				SELECT seq FROM USER
+			UNION ALL
+				SELECT seq FROM exceluploaderror
+			) AS combined_tables
+		</cfquery>
+		<cfreturn qGetSeqNo.seqno>
 	</cffunction>
 	
 	<cffunction name="uploadExcel" access="remote" returntype="string">
@@ -56,7 +68,10 @@
 		<cfquery name="qGetSeqNo" datasource="#application.datasoursename#">
 			SELECT COALESCE(MAX(seq)+1, 1) AS seqno FROM user
 		</cfquery>
-		<cfset local.seqNo = qGetSeqNo.seqno>
+		<cfset local.seqNo = getMaxSeqNo()>
+		<cfif local.seqNo>1>
+			<cfset local.seqNo=local.seqNo+1>
+		</cfif>
 		<!--- Loop through data from row 2 onwards --->
 		<cfset local.startRow = 2>
 		<cfset local.numRows = excelData.recordCount - local.startRow + 1>
@@ -67,15 +82,15 @@
 				<cfset local.errorFlag=0>	
 				<cfset local.errorEmail=0>
 				<cfset local.errorMssg="">	
-				<cfset local.datepattern = '[0-3][0-9]/[0-1][0-9]/[0-2][0-9][0-9][0-9]'>		
+				<cfset local.datepattern = '[0-3][0-9]/[0-1][0-9]/[0-2][0-9][0-9][0-9]'>	
 				
-				<cfif Len(trim(local.slicedData.COL_1)) EQ 0>
+				<cfif Len(trim(local.slicedData.COL_1)) EQ 0 OR (not isValid("regex", local.slicedData.COL_1, "^[a-zA-Z]+$"))>
 					<cfset local.errorFlag=1>
-					<cfset local.errorMssg = "First Name Cant be Null.">
+					<cfset local.errorMssg = "First Name Cant be Null And Should Contain Only characters.">
 				</cfif>
-				<cfif Len(trim(local.slicedData.COL_2)) EQ 0>
+				<cfif Len(trim(local.slicedData.COL_2)) EQ 0 OR (not isValid("regex", local.slicedData.COL_2, "^[a-zA-Z]+$"))>
 					<cfset local.errorFlag=1>
-					<cfset local.errorMssg &= "Last Name Cant be Null.">
+					<cfset local.errorMssg &= "Last Name Cant be Null And Should Contain Only Characters">
 				</cfif>
 				<cfif Len(trim(local.slicedData.COL_3)) EQ 0>
 					<cfset local.errorFlag=1>
@@ -226,15 +241,14 @@
 							) 
 					</cfquery>
 				</cfif>
-			</cfloop>
-			<cfset generateResultExcel(local.seqNo)>			
+			</cfloop>						
 			<cfset local.resultMsg="File uploaded successfully!">
 		<cfelse>
 			<cfset local.resultMsg="No Data to upload">
 		</cfif>
 		<cfreturn local.resultMsg>
 	</cffunction>
-	<cffunction name="generateResultExcel" access="public">
+	<!---<cffunction name="generateResultExcel" access="public">
 		<cfargument name="seqNo">
 		<cfset local.mySpreadsheet = spreadsheetNew()>
 		<cfset spreadsheetAddRow(local.mySpreadsheet, 'First Name,Last Name,Address,Email,Phone,DOB,Role,Result,Reason')>
@@ -244,25 +258,27 @@
 		<cfset local.userObject = createObject("component", "Components.userdetails")>
 		<cfset local.resultUserDetailsError = local.userObject.getUserDetailsWithError(arguments.seqNo)>
 		<cfloop query="local.resultUserDetailsError">
-			<cfset local.rolenames ="'#local.resultUserDetailsError.roles#'">        
+			<cfset local.rolenames ="'#local.resultUserDetailsError.roles#'"> 			
+			<cfset local.address = replace(local.resultUserDetailsError.address, ",", " ", "ALL")>      
 			<cfset local.combinedValues = '#local.resultUserDetailsError.firstname#,#local.resultUserDetailsError.lastname#,
-			#local.resultUserDetailsError.address#,#local.resultUserDetailsError.email#,#local.resultUserDetailsError.phone#,
+			#local.address#,#local.resultUserDetailsError.email#,#local.resultUserDetailsError.phone#,
 			#local.resultUserDetailsError.dob#,#local.rolenames#,Failed,#local.resultUserDetailsError.result#'>
 			<cfset spreadsheetAddRow(local.mySpreadsheet,local.combinedValues)>
 		</cfloop>		
 		<cfset local.resultUserDetails = local.userObject.getUserDetails(arguments.seqNo)>
 		<cfloop query="local.resultUserDetails">
-			<cfset local.rolenames ="'#local.resultUserDetails.rolenames#'">        
+			<cfset local.rolenames ="'#local.resultUserDetails.rolenames#'"> 
+			<cfset local.address = replace(local.resultUserDetails.address, ",", " ", "ALL")>  
 			<cfset local.combinedValues = '#local.resultUserDetails.firstname#,#local.resultUserDetails.lastname#,
-			#local.resultUserDetails.address#,#local.resultUserDetails.email#,#local.resultUserDetails.phone#,
+			#local.address#,#local.resultUserDetails.email#,#local.resultUserDetails.phone#,
 			#DateFormat(local.resultUserDetails.dob, "MM/DD/YYYY")#,#local.rolenames#,#local.resultUserDetails.result#'>
 			<cfset spreadsheetAddRow(local.mySpreadsheet,local.combinedValues)>
 		</cfloop>		
 		<cfset local.timestamp = DateFormat(now(), "yyyymmdd_HHmmss")>
-		<cfset local.uniqueFilename = "ExcelTemplateData_#local.timestamp#.xlsx">
-		<cfset Spreadsheetwrite(local.mySpreadsheet,'#expandPath('ExcelTemplate/DataExcel/')##local.uniqueFilename#',true)>
+		<cfset local.uniqueFilename = "ExcelUpload_#local.timestamp#.xlsx">
+		<cfset Spreadsheetwrite(local.mySpreadsheet,'#expandPath('ExcelUploads/')##local.uniqueFilename#',true)>
 		<cfheader name="Content-Disposition" value="attachment;filename=#uniqueFilename#">
-		<cfcontent file="#expandPath('ExcelTemplate/DataExcel/')##uniqueFilename#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" reset="true"> 				
-	</cffunction>	
+		<cfcontent file="#expandPath('ExcelUploads/')##uniqueFilename#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" reset="true"> 								
+	</cffunction>--->	
 </cfcomponent>
 

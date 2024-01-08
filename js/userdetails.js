@@ -40,3 +40,6 @@ function browse() {
     }
   });
 }
+function download(){
+  window.location.href="downloadResult.cfm"
+}

@@ -3,15 +3,16 @@
         <title>User Details Excel Upload</title>
         <link rel="stylesheet" href="css/userdetails.css"> 
         <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.css">
-        <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
-        <script src="js/jquery-3.6.0.min.js"></script> 
+        <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">        
         <script src="js/userdetails.js"></script>   
+        <script src="js/jquery-3.6.0.min.js"></script> 
     </head>
     <body> 
         <cfoutput>
             <form action="" method="post" id="myForm" enctype="multipart/form-data" >
                 <cfset local.userObject=createObject("component", "Components.userdetails")>
                 <cfset local.resultUserDetails=local.userObject.getUserDetails(0)>
+                <cfset local.seqno=local.userObject.getMaxSeqNo()>
                 <div class="heading">USER INFORMATION</div>
                 <div class="btnDiv">
                     <div class="btnLeft">
@@ -23,9 +24,9 @@
                         <div class="selectedFileInfo" id="selectedFileInfo"></div>  
                         <button class="upload" onclick="upload()" type="submit" name="uploadBtn">Upload</button>
                     </div>
-                </div>   
+                </div>                   
                 <div class="tableDiv">   
-                    <span class="spanTableHeading">Table</span>             
+                    <span class="spanTableHeading">Table</i></span>             
                     <table class="table">
                         <tr>
                             <th>First Name</th>
@@ -34,7 +35,9 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>DOB</th>
-                            <th>Role</th>
+                            <th>Role<cfif local.seqno GT 1>
+                                <i class="fa fa-download download" aria-hidden="true" onclick="download()" title="Download Latest Upload Result">
+                            </cfif></th>
                         </tr>                        
                         <cfloop query="local.resultUserDetails">
                             <tr>
