@@ -4,7 +4,7 @@
 		<cfquery name="qgetUserDetails" datasource="#application.datasoursename#">
 			SELECT
 				u.userid,
-				u.firstname,u.lastname,u.address,u.email,u.phone,u.dob,u.result,
+				u.firstname,u.lastname,u.address,u.email,u.phone,u.dob,u.result,DATE_FORMAT(u.dob,'%d-%m-%Y') as dobdisplay,
 				GROUP_CONCAT(r.rolename, '') AS rolenames,GROUP_CONCAT(u.address, '') AS address
 			FROM
 				USER u

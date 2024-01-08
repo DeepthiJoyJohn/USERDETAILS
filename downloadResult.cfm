@@ -1,12 +1,5 @@
-<cfquery name="qGetSeqNo" datasource="#application.datasoursename#">
-    SELECT MAX(seq) AS seqno
-    FROM (
-        SELECT seq FROM USER
-    UNION ALL
-        SELECT seq FROM exceluploaderror
-    ) AS combined_tables
-</cfquery>
-<cfset local.seqNo = qGetSeqNo.seqno>
+<cfset local.userObject=createObject("component", "Components.userdetails")>
+<cfset local.seqno=local.userObject.getMaxSeqNo()>
 <cfset local.mySpreadsheet = spreadsheetNew()>
 <cfset spreadsheetAddRow(local.mySpreadsheet, 'First Name,Last Name,Address,Email,Phone,DOB,Role,Result,Reason')>
 <cfset local.headerFormat = {}>

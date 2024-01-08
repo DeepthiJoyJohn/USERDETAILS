@@ -46,7 +46,7 @@
                                 <td>#address#</td>
                                 <td>#email#</td>
                                 <td>#phone#</td>
-                                <td>#dob#</td>
+                                <td>#dobdisplay#</td>
                                 <td>#rolenames#</td> 
                             </tr>                           
                         </cfloop>                                      
