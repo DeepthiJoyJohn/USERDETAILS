@@ -1,6 +1,6 @@
 <cfset local.userObject=createObject("component", "Components.userdetails")>
 <cfset local.seqno=local.userObject.getMaxSeqNo()>
-<cfset local.mySpreadsheet = spreadsheetNew()>
+<cfset local.mySpreadsheet = spreadsheetNew("Sheet1",true)>
 <cfset spreadsheetAddRow(local.mySpreadsheet, 'First Name,Last Name,Address,Email,Phone,DOB,Role,Result,Reason')>
 <cfset local.headerFormat = {}>
 <cfset local.headerFormat.bold = "true">
@@ -24,8 +24,5 @@
     #DateFormat(local.resultUserDetails.dob, "MM/DD/YYYY")#,#local.rolenames#,#local.resultUserDetails.result#'>
     <cfset spreadsheetAddRow(local.mySpreadsheet,local.combinedValues)>
 </cfloop>
-<cfset local.timestamp = DateFormat(now(), "yyyymmdd_HHmmss")>
-<cfset local.uniqueFilename = "ExcelResult_#local.timestamp#.xlsx">
-<cfset Spreadsheetwrite(local.mySpreadsheet,'#expandPath('ExcelUploads/Result/')##local.uniqueFilename#',true)>
-<cfheader name="Content-Disposition" value="attachment;filename=#local.uniqueFilename#">
-<cfcontent file="#expandPath('ExcelUploads/Result/')##local.uniqueFilename#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"> 										
+<cfheader name="Content-Disposition" value="attachment;filename=Result.xlsx">
+<cfcontent variable="#spreadsheetReadBinary(local.mySpreadsheet)#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"> 										

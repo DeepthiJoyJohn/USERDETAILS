@@ -1,11 +1,12 @@
-<cfcomponent> 	
+<cfcomponent> 
 	<cffunction name="getUserDetails" access="public" returntype="query">
-		<cfargument name="seqNo">
-		<cfquery name="qgetUserDetails" datasource="#application.datasoursename#">
+		<cfargument name="seqNo" default="0">
+		<cfquery name="local.qgetUserDetails" datasource="#application.datasoursename#">
 			SELECT
 				u.userid,
-				u.firstname,u.lastname,u.address,u.email,u.phone,u.dob,u.result,DATE_FORMAT(u.dob,'%d-%m-%Y') as dobdisplay,
-				GROUP_CONCAT(r.rolename, '') AS rolenames,GROUP_CONCAT(u.address, '') AS address
+				u.firstname,u.lastname,u.address,u.email,u.phone,u.dob,u.result,
+				DATE_FORMAT(u.dob,'%d-%m-%Y') as dobdisplay,
+				GROUP_CONCAT(r.rolename, '') AS rolenames
 			FROM
 				USER u
 			INNER JOIN
@@ -16,64 +17,42 @@
 				WHERE u.seq=<cfqueryparam value="#arguments.seqNo#" cfsqltype="cf_sql_integer">
 			</cfif>
 			GROUP BY
-				u.userid,
-				u.firstname									
+				u.userid								
 		</cfquery>
-		<cfreturn qgetUserDetails> 		
+		<cfreturn local.qgetUserDetails> 		
 	</cffunction>
-	<cffunction name="getUserDetailsWithError" access="public" returntype="query">
-		<cfargument name="seqNo">
-		<cfquery name="qgetUserDetailsWithError" datasource="#application.datasoursename#">
-			SELECT id, email, firstname, lastname, phone, dob,seq,result,roles,GROUP_CONCAT(address, '') AS address
-			FROM exceluploaderror
-			WHERE (firstname <> "" OR lastname <> "" OR address <> "" OR email <> "" 
-			OR phone <> "" OR dob <> "") AND 
-			seq=<cfqueryparam value="#arguments.seqNo#" cfsqltype="cf_sql_integer">	
-			GROUP BY id, email, firstname, lastname, phone, dob,seq,result,roles											
-		</cfquery>
-		<cfreturn qgetUserDetailsWithError> 		
-	</cffunction>
+	
 	<cffunction name="checkEmailExists" access="public" returntype="numeric">
 		<cfargument name="email">		
-		<cfquery name="qcheckEmailExists" datasource="#application.datasoursename#">
+		<cfquery name="local.qcheckEmailExists" datasource="#application.datasoursename#">
 			SELECT email
 			FROM user 
 			WHERE email=<cfqueryparam value="#arguments.email#" cfsqltype="cf_sql_varchar"> 
 		</cfquery>
-		<cfreturn qcheckEmailExists.recordCount>
+		<cfreturn local.qcheckEmailExists.recordCount>
 	</cffunction>
-	<cffunction name="getMaxSeqNo" access="public" returntype="numeric">
-		<cfquery name="qGetSeqNo" datasource="#application.datasoursename#">
-			SELECT COALESCE(MAX(seq), 1) AS seqno
-			FROM (
-				SELECT seq FROM USER
-			UNION ALL
-				SELECT seq FROM exceluploaderror
-			) AS combined_tables
-		</cfquery>
-		<cfreturn qGetSeqNo.seqno>
-	</cffunction>
-	
+
 	<cffunction name="uploadExcel" access="remote" returntype="string">
+		
 		<cfargument name="fileUpload" type="any" required="true">
+		<cftry>
 		<!--- Setting Unique Name for file --->
-		<cfset local.timestamp = DateFormat(now(), "yyyymmdd_HHmmss")>
+		<cfset local.timestamp = DateFormat(now(), "yyyy-mm-dd HH-MM-ss")>
 		<cfset local.uniqueFilename = "Excel_#local.timestamp#.xlsx"> 
-		<!--- Upload the file --->		
+		<!--- Upload the file --->
+		
 		<cffile action="upload" fileField="fileUpload" destination="#expandPath('ExcelUploads/')##uniqueFilename#" nameConflict="MakeUnique">
-		<cfset filePath = "#expandPath('ExcelUploads/')##uniqueFilename#">
+		<cfcatch type="any">
+			<cfdump var="#cfcatch#">
+		</cfcatch>
+		</cftry>		
+		<!---<cfset filePath = "#expandPath('ExcelUploads/')##cffile.serverFile#">--->
 		<!--- Read the uploaded spreadsheet --->
-		<cfspreadsheet action="read" src="#filePath#" query="excelData">
-		<!---Getting Seq No for Excel Upload--->
-		<cfquery name="qGetSeqNo" datasource="#application.datasoursename#">
-			SELECT COALESCE(MAX(seq)+1, 1) AS seqno FROM user
-		</cfquery>
-		<cfset local.seqNo = getMaxSeqNo()>
-		<cfif local.seqNo>1>
-			<cfset local.seqNo=local.seqNo+1>
-		</cfif>
+		<!---<cfspreadsheet action="read" src="#filePath#" query="local.excelData">--->
+		
+		
 		<!--- Loop through data from row 2 onwards --->
-		<cfset local.startRow = 2>
+		<!---<cfset local.startRow = 2>
 		<cfset local.numRows = excelData.recordCount - local.startRow + 1>
 		<cfif excelData.recordCount GT 1>		
 			<cfset local.slicedData = QuerySlice(excelData, local.startRow, local.numRows)>			
@@ -84,58 +63,64 @@
 				<cfset local.errorMssg="">	
 				<cfset local.datepattern = '[0-3][0-9]/[0-1][0-9]/[0-2][0-9][0-9][0-9]'>	
 				
-				<cfif Len(trim(local.slicedData.COL_1)) EQ 0 OR (not isValid("regex", local.slicedData.COL_1, "^[a-zA-Z]+$"))>
+				
+				<cfif Len(trim(local.slicedData.COL_1)) EQ 0 OR not isValid("regex", local.slicedData.COL_1, "^[a-zA-Z]+$")>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg = "First Name Cant be Null And Should Contain Only characters.">
+				<cfelseif(Len(trim(local.slicedData.COL_1)) GT 50)>
+					<cfset local.errorFlag=1>
+					<cfset local.errorMssg = "Maximum length of characters permitted for firastname is 50.">					
 				</cfif>
-				<cfif Len(trim(local.slicedData.COL_2)) EQ 0 OR (not isValid("regex", local.slicedData.COL_2, "^[a-zA-Z]+$"))>
+				<cfif Len(trim(local.slicedData.COL_2)) EQ 0 OR not isValid("regex", local.slicedData.COL_2, "^[a-zA-Z]+$")>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg &= "Last Name Cant be Null And Should Contain Only Characters">
+				<cfelseif(Len(trim(local.slicedData.COL_2)) GT 50)>
+					<cfset local.errorFlag=1>
+					<cfset local.errorMssg = "Maximum length of characters permitted for last name is 50.">					
 				</cfif>
 				<cfif Len(trim(local.slicedData.COL_3)) EQ 0>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg &= "Address Cant be Null.">
+				<cfelseif(Len(trim(local.slicedData.COL_3)) GT 200)>
+					<cfset local.errorFlag=1>
+					<cfset local.errorMssg = "Maximum length of characters permitted for Address is 200.">				   
 				</cfif>
 				<cfif Len(trim(local.slicedData.COL_4)) EQ 0>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg &= "Email Cant be Null.">
+				<cfelseif checkEmailExists(local.slicedData.COL_4) EQ 1>
+					<cfset local.errorEmail=1>
+				<cfelseif NOT isValid("email", local.slicedData.COL_4)>
+					<cfset local.errorFlag=1>
+					<cfset local.errorMssg &= "Enter Valid Email.">					
 				</cfif>
 				<cfif Len(trim(local.slicedData.COL_5)) EQ 0>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg &= "Phone Cant be Null.">
+				<cfelseif NOT(REFind("^\d{10}$", local.slicedData.COL_5)) OR NOT(Len(local.slicedData.COL_5) eq 10)>
+					<cfset local.errorFlag=1>
+					<cfset local.errorMssg &= "Enter Valid Phone No with 10 digits.">					
 				</cfif>
 				<cfif Len(trim(local.slicedData.COL_6)) EQ 0>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg &= "Date Of Birth Cant be Null.">
+				<cfelseif NOT(isValid("date", local.slicedData.COL_6)) OR Len(local.slicedData.COL_6) neq 10><!---OR (REFind(local.datepattern, local.slicedData.COL_6) EQ 0)--->
+					<cfset local.errorFlag=1>
+					<cfset local.errorMssg &= "Invallid Date.Enter Date in(DD-MM-YYYY).">					
 				</cfif>
 				<cfif Len(trim(local.slicedData.COL_7)) EQ 0>
 					<cfset local.errorFlag=1>
 					<cfset local.errorMssg &= "Role Cant be Null.">
 				</cfif>
-				<cfif checkEmailExists(local.slicedData.COL_4) EQ 1>
-					<cfset local.errorEmail=1>					
-				</cfif>
-				<cfif NOT isValid("email", local.slicedData.COL_4)>
-					<cfset local.errorFlag=1>
-					<cfset local.errorMssg &= "Enter Valid Email.">
-				</cfif>
-				<cfif NOT(REFind("^\d{10}$", local.slicedData.COL_5)) OR NOT(Len(local.slicedData.COL_5) eq 10)>
-					<cfset local.errorFlag=1>
-					<cfset local.errorMssg &= "Enter Valid Phone No with 10 digits.">
-				</cfif>			
-				<cfif NOT(isValid("date", local.slicedData.COL_6)) OR Len(local.slicedData.COL_6) neq 10 OR (REFind(local.datepattern, local.slicedData.COL_6) EQ 0)>
-					<cfset local.errorFlag=1>
-					<cfset local.errorMssg &= "Invallid Date.Enter Date in(DD-MM-YYYY).">
-				</cfif>
 				<cfset local.roleArray = ListToArray(local.slicedData.COL_7, ",")>
 				<!---checking if roles Exists--->			
 				<cfloop array="#local.roleArray#" index="item">
-					<cfquery name="qGetRoleID" datasource="#application.datasoursename#">
+					<cfquery name="local.qGetRoleID" datasource="#application.datasoursename#">
 						SELECT roleid
 						FROM role
 						WHERE rolename = <cfqueryparam value="#item#" cfsqltype="cf_sql_varchar">
 					</cfquery>
-					<cfset local.roleID = qGetRoleID.roleid>
+					<cfset local.roleID = local.qGetRoleID.roleid>
 					<cfif Len(trim(local.roleID)) EQ 0>
 						<cfset local.errorFlag=1>
 						<cfset local.errorMssg &= "Select Predefined roles">
@@ -158,6 +143,8 @@
 								<cfqueryparam value="Added" cfsqltype="cf_sql_varchar">															
 							) 
 					</cfquery>
+					<cfset local.lastinsertid=insertQuery.getPrefix().userid>
+					<cfdump var="#local.lastinsertid#" abort>
 					<!---Getting the last inserted userid--->
 					<cfset local.insertedUserID = "">
 					<cfquery name="qGetLastID" datasource="#application.datasoursename#">
@@ -181,6 +168,7 @@
 									<cfqueryparam value="#local.roleID#" cfsqltype="cf_sql_varchar"> 
 								) 
 						</cfquery>
+						
 					</cfloop>
 				<cfelseif local.errorFlag EQ 0 AND local.errorEmail EQ 1>
 					<!---Updating User Table if email Exists--->
@@ -242,12 +230,14 @@
 					</cfquery>
 				</cfif>
 			</cfloop>						
-			<cfset local.resultMsg="File uploaded successfully!">
+			<cfset local.resultMsg=" Data to upload">
 		<cfelse>
 			<cfset local.resultMsg="No Data to upload">
-		</cfif>
-		<cfreturn local.resultMsg>
+		</cfif>--->
+		<cfreturn "sd">
 	</cffunction>
+	
+	
 	<!---<cffunction name="generateResultExcel" access="public">
 		<cfargument name="seqNo">
 		<cfset local.mySpreadsheet = spreadsheetNew()>
