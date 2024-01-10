@@ -27,8 +27,7 @@ function upload1() {
       url: 'Components/userdetails.cfc?method=uploadExcel',
       data: formData,
       processData: false, 
-      contentType: false, 
-      enctype: 'multipart/form-data', 
+      contentType: false,        
       cache: false,
       success: function(data){ 
         var retval = $(data).find("string").text();

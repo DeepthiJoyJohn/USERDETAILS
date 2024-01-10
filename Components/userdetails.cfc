@@ -35,17 +35,14 @@
 	<cffunction name="uploadExcel" access="remote" returntype="string">
 		
 		<cfargument name="fileUpload" type="any" required="true">
-		<cftry>
+		
 		<!--- Setting Unique Name for file --->
 		<cfset local.timestamp = DateFormat(now(), "yyyy-mm-dd HH-MM-ss")>
 		<cfset local.uniqueFilename = "Excel_#local.timestamp#.xlsx"> 
 		<!--- Upload the file --->
 		
-		<cffile action="upload" fileField="fileUpload" destination="#expandPath('ExcelUploads/')##uniqueFilename#" nameConflict="MakeUnique">
-		<cfcatch type="any">
-			<cfdump var="#cfcatch#">
-		</cfcatch>
-		</cftry>		
+		<cffile action="upload" fileField="fileUpload" destination="#expandPath('ExcelUploads/')##local.uniqueFilename#" nameConflict="MakeUnique">
+				
 		<!---<cfset filePath = "#expandPath('ExcelUploads/')##cffile.serverFile#">--->
 		<!--- Read the uploaded spreadsheet --->
 		<!---<cfspreadsheet action="read" src="#filePath#" query="local.excelData">--->
