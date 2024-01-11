@@ -9,10 +9,16 @@ function cancelSelection(){
   window.location.reload();  
 }
 function onSubmitFunction(){
-  setTimeout(function() {
-    window.location.href="index.cfm" // Refresh parent page
-  }, 3000);
-  
+  var fileInput = document.getElementById('fileUpload');
+  var result = document.getElementById('result'); 
+  if (fileInput.files.length === 0) {
+      result.innerHTML = "Please choose a file to upload.";
+      return false;
+  }else{ 
+    setTimeout(function() {
+      window.location.href="index.cfm" // Refresh parent page
+    }, 3000);
+ }
 }
 
 function browse() {   

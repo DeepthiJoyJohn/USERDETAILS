@@ -4,9 +4,7 @@
         <link rel="stylesheet" href="css/userdetails.css"> 
         <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.css">
         <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">  
-        <script src="js/jquery-3.6.0.min.js"></script> 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-file-upload/4.0.11/jquery.uploadfile.js"></script>
+        <script src="js/jquery-3.6.0.min.js"></script>         
         <script src="js/userdetails.js"></script>  
     </head>
     <body> 
@@ -57,7 +55,6 @@
                 <cfset local.userObject.uploadExcel(#form.fileUpload#)> 
             </cfif>                         
             <div class="result" id="result"></div>         
-        </cfoutput>
-          
+        </cfoutput>          
     </body>     
 </html>
