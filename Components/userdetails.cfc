@@ -157,8 +157,7 @@
 								<cfset arrayAppend(local.roleIDArray, local.roleID)> 
 							</cfif>
 						</cfloop>	
-					</cfif>
-								
+					</cfif>								
 					<!---Inserting to user table--->
 					<cfif local.errorFlag EQ 0 AND local.errorEmail EQ 0>
 							<cfquery name="local.qInsertUserDetails" datasource="#application.datasoursename#" result="local.rInsertUserDetails">
@@ -278,28 +277,27 @@
 				<cfthrow message="#cfcatch.message#">
 			</cfcatch>
 		</cftry>
-		<cftry>
+		<cftry>			
 			<!--Writing the result excel--->
 			<cfset local.filePath = "#expandPath('ExcelUploads/Result/')##local.uniqueFilename#">
 			<cfspreadsheet action="write" filename="#filePath#" name="local.mySpreadsheet" overwrite="true">	
 			<!---Reading the result Excel to sort--->		
-			<cfspreadsheet action="read" src="#local.filePath#" query="local.excelResultData" excludeHeaderRow="false">						
-			<cfquery name="sortedquery" dbtype="query">
-				SELECT COL_1,COL_2,COL_3,COL_4,COL_5,COL_6,COL_7,COL_8,COL_9
-				FROM local.excelResultData 
-				WHERE COL_8 <> 'Result'
-				ORDER BY COL_8 DESC				
-			</cfquery>	
+			<cfspreadsheet action="read" src="#local.filePath#" query="local.excelResultData" excludeHeaderRow="true" headerrow="1">
+			<cfquery name="local.sortedquery" dbtype="query">
+				SELECT *
+				FROM local.excelResultData 	
+				ORDER BY Result DESC	
+			</cfquery>				
 			<!---Creating sorted Excel--->		
 			<cfset local.mySpreadsheetSorted = spreadsheetNew("Sheet1",true)>
 			<cfset spreadsheetAddRow(local.mySpreadsheetSorted, 'First Name,Last Name,Address,Email,Phone,DOB,Role,Result,Reason')>
 			<cfset local.headerFormat = {}>
 			<cfset local.headerFormat.bold = "true">
 			<cfset spreadsheetFormatRow(local.mySpreadsheetSorted, local.headerFormat, 1)> 
-			<cfset spreadsheetAddRows(local.mySpreadsheetSorted, sortedquery)>
+			<cfset spreadsheetAddRows(local.mySpreadsheetSorted, local.sortedquery)>
 			<!---Auto Downloading the sorted Excel--->
 			<cfheader name="Content-Disposition" value="inline;filename=Data.xlsx">
-			<cfcontent  variable="#spreadsheetReadBinary(local.mySpreadsheetSorted)#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"> 
+			<cfcontent  variable="#spreadsheetReadBinary(local.mySpreadsheetSorted)#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"> 						
 			<cfcatch type="any">				
 				<cfthrow message="An error occurred while processing the spreadsheet: #cfcatch.message#">
 			</cfcatch>
