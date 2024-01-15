@@ -52,7 +52,7 @@
             </form>  
             <cfset local.resultExcelUpload="">
             <cfif  StructKeyExists(form,"uploadBtn") && NOT IsNull(form.fileUpload)> 
-                <cfset local.userObject.uploadExcel(#form.fileUpload#)>                 
+                <cfset local.userObject.uploadExcel(form.fileUpload)>                 
             </cfif>                         
             <div class="result" id="result"></div>         
         </cfoutput>          
