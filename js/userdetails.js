@@ -1,17 +1,12 @@
-function generateExcelTemplate(){  
-  window.location.href="downloadExcelTemplate.cfm";
-  
+function generateExcelTemplate(data){ 
+  window.location.href="downloadExcelTemplate.cfm?data="+data;  
 }
-function generateDataExcelTemplate(){
-  window.location.href="downloadDataExcelTemplate.cfm"
-}
+
 function cancelSelection(){
   window.location.reload();  
 }
 function onSubmitFunction(){  
-    setTimeout(function() {
-      window.location.href="index.cfm" // Refresh parent page
-    }, 2000);
+ // window.location.href="downloadExcelTemplate.cfm?data="+data;
  
 }
 function checkFileExists(){
