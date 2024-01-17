@@ -86,14 +86,14 @@
 		<cftry>
 			<!---Creating Array to store Excel data--->
 			<cfset local.dataArrayInserted = []>			
-			<cfset local.dataArrayError = []>
-			<cfset local.roleIdList="">
+			<cfset local.dataArrayError = []>			
 			<!---End--->
 			<cfif local.excelData.recordCount GT 1>				
 				<cfloop query="local.excelData" startrow="2">
 					<!---Validating Data--->	
 					<cfset local.errorFlag=0>
-					<cfset local.errorMssg="">						
+					<cfset local.errorMssg="">	
+					<cfset local.roleIdList="">					
 					<cfif Len(trim(local.excelData.COL_1)) EQ 0 OR not isValid("regex", local.excelData.COL_1, "^[a-zA-Z]+$")>
 						<cfset local.errorFlag=1>
 						<cfset local.errorMssg = "First Name Cant be Null And Should Contain Only characters.">
@@ -147,8 +147,7 @@
 								FROM role
 								WHERE rolename = <cfqueryparam value="#local.currentItem#" cfsqltype="cf_sql_varchar">
 							</cfquery>
-							<cfset local.roleID = local.qGetRoleID.roleid>
-					
+							<cfset local.roleID = local.qGetRoleID.roleid>					
 							<cfif Len(trim(local.roleID)) EQ 0>
 								<cfset local.errorFlag=1>
 								<cfset local.errorMssg &= "Select Predefined roles">
@@ -175,7 +174,7 @@
 					<cfset local.userId=checkEmailExists(local.excelData.COL_4)>					
 					<cfset local.lastUpdatedID = 0>								
 					<cfif local.errorFlag EQ 0 AND Len(trim(local.userId)) EQ 0>
-						<cftry>
+						<cftry>							
 							<cfquery name="local.qInsertUserDetails" datasource="#application.datasoursename#" result="local.rInsertUserDetails">
 								INSERT
 								INTO 
@@ -187,34 +186,29 @@
 										<cfqueryparam value="#local.excelData.COL_5#" cfsqltype="cf_sql_varchar">,
 										<cfqueryparam value="#DateFormat(local.excelData.COL_6, "yyyy-mm-dd")#" cfsqltype="cf_sql_date">				
 									) 							
-							</cfquery>
-						<cfcatch>
-							<cfoutput>Error qInsertUserDetails</cfoutput>
-						</cfcatch>	
-					    </cftry>							
-						<cfif local.rInsertUserDetails.keyExists('GENERATEDKEY')>
-							<cfset local.lastInsertedID= local.rInsertUserDetails.generatedkey>	
-							<!---Inserting to user role table--->
-							<cftry>
-								<cfloop list="#local.roleIdList#" index="local.item">											
-									<cfquery name="local.qInsertUserRoles" datasource="#application.datasoursename#">
-										INSERT
-										INTO 
-										userroles (userid,roleid)
-										VALUES (<cfqueryparam value="#local.lastInsertedID#" cfsqltype="cf_sql_integer">,
-												<cfqueryparam value="#local.item#" cfsqltype="cf_sql_integer"> 
-											) 
-									</cfquery>						
-								</cfloop>
+							</cfquery>													
+							<cfif local.rInsertUserDetails.keyExists('GENERATEDKEY')>
+								<cfset local.lastInsertedID= local.rInsertUserDetails.generatedkey>	
+								<!---Inserting to user role table--->								
+									<cfloop list="#local.roleIdList#" index="local.item">											
+										<cfquery name="local.qInsertUserRoles" datasource="#application.datasoursename#">
+											INSERT
+											INTO 
+											userroles (userid,roleid)
+											VALUES (<cfqueryparam value="#local.lastInsertedID#" cfsqltype="cf_sql_integer">,
+													<cfqueryparam value="#local.item#" cfsqltype="cf_sql_integer"> 
+												) 
+										</cfquery>						
+									</cfloop>
+								<cfset local.rowData["Column9"] = "Added">
+								<!---Inserting to Array--->	
+								<cfset arrayAppend(local.dataArrayInserted, local.rowData)>
+								<!---End--->
+							</cfif>	
 							<cfcatch>								
-																						
+								<cfthrow message="#cfcatch.message#">
 							</cfcatch>
-							</cftry>
-							<cfset local.rowData["Column9"] = "Added">
-							<!---Inserting to Array--->	
-							<cfset arrayAppend(local.dataArrayInserted, local.rowData)>
-							<!---End--->
-						</cfif>						
+						</cftry>					
 					<cfelseif local.errorFlag EQ 0 AND Len(trim(local.userId)) NEQ 0>
 						<!---Updating User Table if email Exists--->
 						<cftry>
@@ -227,9 +221,9 @@
 									dob=<cfqueryparam value="#DateFormat(local.excelData.COL_6, "yyyy-mm-dd")#" cfsqltype="cf_sql_date">							
 									WHERE userid=<cfqueryparam value="#local.userId#" cfsqltype="cf_sql_integer">
 							</cfquery>
-						<cfcatch>
-							<cfoutput>Error qUpdateUserTable</cfoutput>
-						</cfcatch>	
+							<cfcatch>
+								<cfthrow message="#cfcatch.message#">	
+							</cfcatch>	
 						</cftry>						
 						<!---Updating userRole Table--->
 						<!---Selecting from userrole table--->											
@@ -241,9 +235,9 @@
 								AND roleid NOT IN (			
 									<cfqueryparam value=#local.roleIdList# cfsqltype="cf_sql_varchar">)
 							</cfquery>							
-						<cfcatch>
-							<cfoutput>Error qSelectuserroles</cfoutput>
-						</cfcatch>
+							<cfcatch>
+								<cfthrow message="#cfcatch.message#">	
+							</cfcatch>
 						</cftry>						
 						<cftry>
 							<cfif local.qSelectUserRoles.recordCount>							
@@ -256,7 +250,9 @@
 										</cfquery>
 								</cfloop>	
 							</cfif>
-						<cfcatch><cfoutput>Error Delete qSelectUserRoles</cfoutput></cfcatch>
+							<cfcatch>
+								<cfthrow message="#cfcatch.message#">	
+							</cfcatch>
 						</cftry>
 						
 						<!---inseritng to userroles table where roleid is not there from excel upload--->
@@ -273,7 +269,7 @@
 										)
 							</cfquery>	
 							<cfcatch>
-								<cfoutput>Error database qcheckrole</cfoutput>
+								<cfthrow message="#cfcatch.message#">	
 							</cfcatch>
 						</cftry>	
 						<cfif local.qcheckrole.recordCount GT 0>
@@ -307,13 +303,11 @@
 				</cfloop>	
 			</cfif>
 			<cfcatch>				
-				<cfthrow message="#cfcatch.message#">
-				<cfdump var="#local.rowNum#" abort>
+				<cfthrow message="#cfcatch.message#">				
 			</cfcatch>
 		</cftry>
 		<cftry>					
-			<!---Writing to the result excel--->
-			
+			<!---Writing to the result excel--->			
 			<cfloop array="#local.dataArrayError#" index="row">
 				<cfset spreadsheetSetCellValue(local.mySpreadsheet, row.Column1, local.rowNum, 1)>
 				<cfset spreadsheetSetCellValue(local.mySpreadsheet, row.Column2, local.rowNum, 2)>
@@ -325,8 +319,7 @@
 				<cfset spreadsheetSetCellValue(local.mySpreadsheet, "Failed", local.rowNum, 8)>
 				<cfset spreadsheetSetCellValue(local.mySpreadsheet, row.Column8, local.rowNum, 9)>
 				<cfset local.rowNum = local.rowNum+1>
-			</cfloop>
-			
+			</cfloop>			
 			<cfloop array="#local.dataArrayInserted#" index="row">				
 				<cfset spreadsheetSetCellValue(local.mySpreadsheet, row.Column1, local.rowNum, 1)>
 				<cfset spreadsheetSetCellValue(local.mySpreadsheet, row.Column2, local.rowNum, 2)>
@@ -340,11 +333,6 @@
 				<cfset local.rowNum = local.rowNum+1>
 			</cfloop>	
 			<cfspreadsheet action="write" filename="#expandPath('ExcelUploads/Result/')#UploadResult.xlsx" name="local.myspreadsheet" overwrite="true">
-		    
-			<!---End--->
-			<!---Auto Downloading the Result Excel--->
-			<!---<cfheader name="Content-Disposition" value="inline;filename=Data.xlsx">
-			<cfcontent  variable="#spreadsheetReadBinary(local.mySpreadsheet)#" type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">---> 						
 			<cfreturn "done">
 			<cfcatch type="any">				
 				<cfthrow message="An error occurred while processing the spreadsheet: #cfcatch.message#">
