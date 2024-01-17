@@ -9,7 +9,7 @@
     </head>
     <body> 
         <cfoutput>            
-            <form action="" method="post" id="myForm" name="myForm" enctype="multipart/form-data" onsubmit="cancelSelection()">
+            <form action="" method="post" id="myForm" name="myForm" enctype="multipart/form-data">
                 <cfset local.spreadSheetObj="">                
                 <cfset local.userObject=createObject("component", "Components.userdetails")>  
                 <cfif  StructKeyExists(form,"uploadBtn") && NOT IsNull(form.fileUpload)> 
@@ -55,7 +55,7 @@
                 </div>
             </form>  
             <cfif local.spreadSheetObj EQ "done">
-                <meta http-equiv="refresh" content="0;url=downloadResult.cfm">
+                <meta http-equiv="refresh" content="0;url=downloadExcelTemplate.cfm">
             </cfif>              
             <div class="result" id="result"></div>         
         </cfoutput>          
