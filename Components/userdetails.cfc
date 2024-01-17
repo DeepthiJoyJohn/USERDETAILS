@@ -18,7 +18,7 @@
 					u.userid								
 			</cfquery>			 		
 			<cfcatch type="any">        
-				<cfoutput>#cfcatch.message#in qgetUserDetails</cfoutput>
+				<cfthrow message="#cfcatch.message#">	
 			</cfcatch>	
 		</cftry>
 		<cfreturn local.qgetUserDetails>	
@@ -37,7 +37,7 @@
 				<cfoutput>#cfcatch.message#</cfoutput>     
 			</cfcatch>
 			<cfcatch type="any">			
-				<cfoutput>#cfcatch.message#"in checkEmailExists"</cfoutput>
+				<cfthrow message="#cfcatch.message#">	
 			</cfcatch>
 		</cftry>
 	</cffunction>	
